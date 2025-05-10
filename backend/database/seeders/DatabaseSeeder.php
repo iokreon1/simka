@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +12,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
+        // Memanggil UserSeeder untuk membuat user Admin
+        $this->call(UserSeeder::class);
+        
+        // Menambahkan user lain secara manual (jika menggunakan factory, factory juga perlu diubah)
+        User::create([
+            'username' => 'testuser',
             'email' => 'test@example.com',
+            'password' => bcrypt('password123'),
+            'role' => 'user',
+            'nama_lengkap' => 'Test User',
         ]);
     }
 }

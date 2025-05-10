@@ -5,6 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,14 +13,91 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { motion } from "framer-motion"
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Implementasi login akan ditambahkan di sini
-    console.log("Login dengan:", { email, password, rememberMe })
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validasi form
+    if (!email.trim()) {
+      setErrorMessage("Email tidak boleh kosong");
+      return;
+    }
+    
+    if (!password) {
+      setErrorMessage("Password tidak boleh kosong");
+      return;
+    }
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrorMessage("Format email tidak valid");
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    const loginData = { 
+      email, 
+      password,
+      remember: rememberMe  // Tambahkan data "remember me"
+    };
+
+    try {
+      // Ambil CSRF cookie dari Laravel Sanctum
+      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      // Dapatkan token CSRF dari cookie
+      const csrfToken = getCookie('XSRF-TOKEN');
+      
+      // Kirim permintaan login dengan token CSRF
+      const res = await fetch("http://localhost:8000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest", 
+          "Accept": "application/json",
+          "X-XSRF-TOKEN": csrfToken, // Menambahkan CSRF token disini
+        },
+        credentials: "include",
+        body: JSON.stringify(loginData),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.message || `Login gagal dengan status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("Login berhasil:", data);
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Terjadi kesalahan:", error);
+      setErrorMessage(error instanceof Error ? error.message : 'Periksa email dan password Anda.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fungsi untuk mendapatkan nilai cookie berdasarkan nama
+  function getCookie(name: string): string {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) {
+      const cookieValue = parts.pop()?.split(';').shift() || '';
+      return decodeURIComponent(cookieValue); // Dekode token
+    }
+    return '';
   }
 
   return (
@@ -92,6 +170,12 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {errorMessage && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                  {errorMessage}
+                </div>
+              )}
+              
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-700">
                   Email
@@ -140,9 +224,10 @@ export default function LoginPage() {
               </div>
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full h-12 bg-[#0A2647] hover:bg-[#144272] text-base rounded-lg transition-all duration-200 transform hover:scale-[1.02]"
               >
-                Masuk
+                {isLoading ? "Memproses..." : "Masuk"}
               </Button>
             </form>
 

@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\CorsMiddleware;
+use App\Http\Controllers\PostController;
 
-Route::middleware([CorsMiddleware::class])->group(function () {
+// Rute API yang butuh autentikasi Sanctum
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/posts', [PostController::class, 'index']);
 });
