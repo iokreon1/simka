@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dss_parameters', function (Blueprint $table) {
+        Schema::create('decision_tree_rules', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_parameter', 100);
-            $table->text('deskripsi')->nullable();
-            $table->decimal('nilai_bobot', 5, 2)->default(1.00); // max 999.99
-            $table->boolean('is_active')->default(true);
+            $table->string('nama_rule');
+            $table->text('kondisi');
+            $table->string('hasil_keputusan');
+            $table->integer('prioritas');
+            $table->boolean('status_aktif')->default(true);
             $table->timestamps();
         });
-        
     }
 
     /**
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dss_parameters');
+        Schema::dropIfExists('decision_tree_rules');
     }
 };

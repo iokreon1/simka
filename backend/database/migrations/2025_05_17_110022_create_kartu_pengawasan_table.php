@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('kartu_pengawasan', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pengajuan_id')->constrained('pengajuan')->onDelete('cascade');
-            $table->string('nomor_kartu', 50);
+            $table->foreignId('kendaraan_id')->constrained('kendaraan')->onDelete('cascade');
+            $table->string('nomor_kartu');
             $table->date('tanggal_terbit');
-            $table->date('tanggal_berlaku');
-            $table->enum('status', ['aktif', 'kadaluarsa', 'dibatalkan'])->default('aktif');
-            $table->timestamps(); // created_at & updated_at otomatis
+            $table->date('tanggal_berlaku_mulai');
+            $table->date('tanggal_berlaku_selesai');
+            $table->enum('status', ['aktif', 'expired', 'dibatalkan']);
+            $table->timestamps();
         });
-        
     }
 
     /**

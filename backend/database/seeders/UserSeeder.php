@@ -7,15 +7,14 @@ use App\Models\User;
 
 class UserSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         User::create([
             'username' => 'admin',
             'email' => 'admin@example.com',
             'password' => bcrypt('password123'),
-            'role' => 'superadmin', // Perlu menentukan role karena wajib
-            'nama_lengkap' => 'Administrator',
-            // Kolom lain yang nullable tidak perlu diisi
+            'role' => 'admin',
+            'nomor_telepon' => '08123456789',
         ]);
     }
 }

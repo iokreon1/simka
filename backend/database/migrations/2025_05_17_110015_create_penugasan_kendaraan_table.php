@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kendaraan_trayek', function (Blueprint $table) {
+        Schema::create('penugasan_kendaraan', function (Blueprint $table) {
             $table->id();
             $table->foreignId('kendaraan_id')->constrained('kendaraan')->onDelete('cascade');
-            $table->foreignId('trayek_id')->constrained('trayek')->onDelete('cascade');
+            $table->foreignId('pengemudi_id')->constrained('pengemudi')->onDelete('cascade');
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai')->nullable();
-            $table->enum('status', ['aktif', 'tidak_aktif'])->default('aktif');
-            $table->timestamps(); // created_at & updated_at
+            $table->string('status_penugasan');
+            $table->text('keterangan')->nullable();
+            $table->timestamps();
         });
-        
     }
 
     /**
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kendaraan_trayek');
+        Schema::dropIfExists('penugasan_kendaraan');
     }
 };

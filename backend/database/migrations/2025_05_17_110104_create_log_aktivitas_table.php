@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('log_aktivitas', function (Blueprint $table) {
+       Schema::create('log_aktivitas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->string('aktivitas', 255);
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('aktivitas');
             $table->text('deskripsi')->nullable();
-            $table->timestamp('created_at')->useCurrent();
+            $table->dateTime('tanggal_aktivitas');
+            $table->ipAddress('ip_address')->nullable();
+            $table->timestamps();
         });
-        
     }
 
     /**
