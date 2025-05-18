@@ -23,9 +23,13 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
+        'username',
         'password',
+        'email',
+        'nomor_telepon',
+        'role',
+        'foto_profil',
+        'status_akun',
     ];
 
     /**
@@ -49,5 +53,40 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function perusahaanAngkutan()
+    {
+        return $this->hasOne(PerusahaanAngkutan::class);
+    }
+
+    public function pemilikKendaraan()
+    {
+        return $this->hasOne(PemilikKendaraan::class);
+    }
+
+    public function pengajuanPerpanjangan()
+    {
+        return $this->hasMany(PengajuanPerpanjangan::class);
+    }
+
+    public function pengajuanRekomendasi()
+    {
+        return $this->hasMany(PengajuanRekomendasi::class);
+    }
+
+    public function verifikasi()
+    {
+        return $this->hasMany(Verifikasi::class);
+    }
+
+    public function reminders()
+    {
+        return $this->hasMany(Reminder::class);
+    }
+
+    public function logAktivitas()
+    {
+        return $this->hasMany(LogAktivitas::class);
     }
 }
