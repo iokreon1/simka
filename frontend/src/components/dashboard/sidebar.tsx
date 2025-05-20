@@ -1,5 +1,8 @@
+"use client";
+
 import type React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation";
 import {
   BarChart3,
   ClipboardList,
@@ -37,6 +40,20 @@ export function NavItem({ href, icon, label, active = false }: NavItemProps) {
 }
 
 export function Sidebar() {
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      await fetch("http://localhost:8000/api/logout", {
+        method: "POST",
+        credentials: "include",
+      })
+      router.push("/login")
+    } catch (error) {
+      console.error("Gagal logout:", error)
+    }
+  }
+
   return (
     <nav className="flex h-full flex-col px-3 py-4">
       <div className="space-y-1">
@@ -51,7 +68,13 @@ export function Sidebar() {
       <div className="mt-auto space-y-1 pt-4">
         <NavItem href="#" icon={<User className="h-5 w-5" />} label="Profil" />
         <NavItem href="#" icon={<Settings className="h-5 w-5" />} label="Pengaturan" />
-        <NavItem href="#" icon={<LogOut className="h-5 w-5" />} label="Keluar" />
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
+        >
+          <LogOut className="h-5 w-5" />
+          <span className="text-sm font-medium">Keluar</span>
+        </button>
       </div>
     </nav>
   )

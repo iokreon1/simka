@@ -14,29 +14,30 @@ class AuthController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        if (Auth::attempt($credentials, $request->remember)) {
-            $request->session()->regenerate(); // penting untuk keamanan
-
-            return response()->json([
-                'message' => 'Login berhasil',
-                'user' => Auth::user(),
-            ]);
+        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
+            return response()->json(['message' => 'Email atau password salah'], 401);
         }
 
-        return response()->json(['message' => 'Email atau password salah'], 401);
+        $request->session()->regenerate(); // Hindari session fixation
+
+        return response()->json([
+            'message' => 'Login berhasil',
+            'user' => Auth::user(),
+        ]);
     }
 
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        Auth::guard('web')->logout(); // ⬅️ logout session
+
+        $request->session()->invalidate();       // Invalidate session
+        $request->session()->regenerateToken();  // Regenerate CSRF token
 
         return response()->json(['message' => 'Logout berhasil']);
     }
 
     public function user(Request $request)
     {
-        return response()->json(Auth::user());
+        return response()->json($request->user());
     }
 }

@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+
 import { Header } from "@/components/dashboard/header"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { QuickActions } from "@/components/dashboard/quick-actions"
@@ -12,6 +14,42 @@ import { ActivitiesSection } from "@/components/dashboard/activities-section"
 
 export default function DashboardPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<{ name?: string } | null>(null)
+  const router = useRouter()
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/user", {
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+          },
+        })
+
+        if (res.status !== 200) {
+          router.push("/login")
+          return
+        }
+
+        const data = await res.json()
+        setUser(data)
+        setLoading(false)
+      } catch (error) {
+        router.push("/login")
+      }
+    }
+
+    checkAuth()
+  }, [router])
+
+  if (loading)
+    return (
+      <div className="p-6 text-center text-slate-600 dark:text-slate-400">
+        Memuat dashboard...
+      </div>
+    )
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -29,7 +67,9 @@ export default function DashboardPage() {
           <div className="container mx-auto max-w-6xl pb-12">
             <div className="mb-8">
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
-              <p className="text-slate-500 dark:text-slate-400">Selamat datang kembali, Ahmad Fauzi</p>
+              <p className="text-slate-500 dark:text-slate-400">
+                Selamat datang kembali, {user?.name || "User"}
+              </p>
             </div>
 
             {/* Quick Actions */}
