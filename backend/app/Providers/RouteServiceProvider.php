@@ -13,25 +13,31 @@ class RouteServiceProvider extends ServiceProvider
     public const HOME = '/dashboard';
 
     public function boot(): void
-    {
-        $this->configureRateLimiting(); // pastikan ini ada
+{
+    $this->configureRateLimiting();
 
-        $this->routes(function () {
-            Route::middleware('api')
-                ->prefix('api')
-                ->group(base_path('routes/api.php'));
+    $this->routes(function () {
+        Route::middleware('api')
+            ->prefix('api')
+            ->group(base_path('routes/api.php'));
 
-            Route::middleware('web')
-                ->group(base_path('routes/web.php'));
-        });
-    }
+        Route::middleware('web')
+            ->group(base_path('routes/web.php'));
+    });
 
-    protected function configureRateLimiting(): void
-    {
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by(
-                optional($request->user())->id ?: $request->ip()
-            );
-        });
-    }
+    // Tambahkan route login supaya tidak error Route [login] not defined
+    Route::get('/login', function () {
+        return redirect('http://localhost:3000/login');
+    })->name('login');
+}
+
+protected function configureRateLimiting(): void
+{
+    RateLimiter::for('api', function (Request $request) {
+        return Limit::perMinute(60)->by(
+            optional($request->user())->id ?: $request->ip()
+        );
+    });
+}
+
 }

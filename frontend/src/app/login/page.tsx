@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import Cookies from 'js-cookie'
 
 import { useState } from "react"
 import Image from "next/image"
@@ -11,8 +12,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { motion } from "framer-motion"
+import useAuthRedirect from "@/hooks/useAuthRedirect"
 
 export default function LoginPage() {
+  useAuthRedirect();
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -21,85 +24,116 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // Validasi form
-    if (!email.trim()) {
-      setErrorMessage("Email tidak boleh kosong")
-      return
-    }
-
-    if (!password) {
-      setErrorMessage("Password tidak boleh kosong")
-      return
-    }
-
-    // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      setErrorMessage("Format email tidak valid")
-      return
-    }
-
-    setIsLoading(true)
-    setErrorMessage(null)
-
-    const loginData = {
-      email,
-      password,
-      remember: rememberMe, // Tambahkan data "remember me"
-    }
-
-    try {
-      // Ambil CSRF cookie dari Laravel Sanctum
-      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
-        method: "GET",
-        credentials: "include",
-      })
-
-      // Dapatkan token CSRF dari cookie
-      const csrfToken = getCookie("XSRF-TOKEN")
-
-      // Kirim permintaan login dengan token CSRF
-      const res = await fetch("http://localhost:8000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-          Accept: "application/json",
-          "X-XSRF-TOKEN": csrfToken, // Menambahkan CSRF token disini
-        },
-        credentials: "include",
-        body: JSON.stringify(loginData),
-      })
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null)
-        throw new Error(errorData?.message || `Login gagal dengan status: ${res.status}`)
-      }
-
-      const data = await res.json()
-      console.log("Login berhasil:", data)
-      router.push("/dashboard")
-    } catch (error) {
-      console.error("Terjadi kesalahan:", error)
-      setErrorMessage(error instanceof Error ? error.message : "Periksa email dan password Anda.")
-    } finally {
-      setIsLoading(false)
-    }
+  setErrorMessage(null);
+  
+  if (!email.trim()) {
+    setErrorMessage("Email tidak boleh kosong");
+    return;
   }
 
-  // Fungsi untuk mendapatkan nilai cookie berdasarkan nama
-  function getCookie(name: string): string {
-    const value = `; ${document.cookie}`
-    const parts = value.split(`; ${name}=`)
-    if (parts.length === 2) {
-      const cookieValue = parts.pop()?.split(";").shift() || ""
-      return decodeURIComponent(cookieValue) // Dekode token
-    }
-    return ""
+  if (!password) {
+    setErrorMessage("Password tidak boleh kosong");
+    return;
   }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    setErrorMessage("Format email tidak valid");
+    return;
+  }
+
+  setIsLoading(true);
+  setErrorMessage(null);
+
+  const loginData = {
+    email,
+    password,
+    remember: rememberMe,
+  };
+
+  try {
+    // Ambil CSRF cookie
+    await fetch("http://localhost:8000/sanctum/csrf-cookie", {
+      credentials: "include",
+    });
+
+    // Ambil token dari cookie
+    const csrfToken = getCookie("XSRF-TOKEN");
+    if (!csrfToken) throw new Error("CSRF token tidak ditemukan.");
+
+    // Tambahkan delay 100ms (sementara untuk testing)
+await new Promise((res) => setTimeout(res, 100));
+
+    // Kirim login
+    const loginRes = await fetch("http://localhost:8000/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+        "X-XSRF-TOKEN": csrfToken,
+      },
+      credentials: "include",
+      body: JSON.stringify(loginData),
+    });
+
+    if (!loginRes.ok) {
+      const errorData = await loginRes.json().catch(() => null);
+      throw new Error(errorData?.message || `Login gagal (${loginRes.status})`);
+    }
+
+    // Ambil user info
+    const userRes = await fetch("http://localhost:8000/api/user", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      credentials: "include",
+    });
+
+    if (!userRes.ok) {
+      throw new Error("Gagal mengambil data pengguna.");
+    }
+
+    const user = await userRes.json();
+    if (!user?.role) {
+      throw new Error("Data pengguna tidak lengkap.");
+    }
+
+    // Redirect
+    if (user.role === "admin") {
+      router.replace("/admin/dashboard");
+      } else if (user.role === "user") {
+  router.replace("/user/dashboard");
+}
+ else {
+      throw new Error("Role pengguna tidak dikenali.");
+    }
+
+  } catch (error) {
+    console.error("Terjadi kesalahan:", error);
+    setErrorMessage(
+      error instanceof Error ? error.message : "Kesalahan saat login."
+    );
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// Ambil cookie dari browser
+function getCookie(name: string): string {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    return decodeURIComponent(parts.pop()!.split(";").shift() || "");
+  }
+  return "";
+}
+
 
   return (
     <div className="min-h-screen flex flex-col">
