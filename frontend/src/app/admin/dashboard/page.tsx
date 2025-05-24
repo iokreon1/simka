@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 
-import { Header } from "@/components/dashboard/header"
-import { Sidebar } from "@/components/dashboard/sidebar"
-import { QuickActions } from "@/components/dashboard/quick-actions"
-import { StatsCards } from "@/components/dashboard/stats-cards"
-import { ApplicationsSection } from "@/components/dashboard/applications-section"
-import { StatusSection } from "@/components/dashboard/status-section"
-import { FeaturesSection } from "@/components/dashboard/features-section"
-import { ActivitiesSection } from "@/components/dashboard/activities-section"
+import { Header } from "@/components/admin/header"
+import { Sidebar } from "@/components/admin/sidebar"
+import { QuickActions } from "@/components/admin/quick-actions"
+import { StatsCards } from "@/components/admin/stats-cards"
+import { ApplicationsSection } from "@/components/admin/applications-section"
+import { StatusSection } from "@/components/admin/status-section"
+import { FeaturesSection } from "@/components/admin/features-section"
+import { ActivitiesSection } from "@/components/admin/activities-section"
 
 export default function DashboardPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -18,38 +18,48 @@ export default function DashboardPage() {
   const [user, setUser] = useState<{ name?: string } | null>(null)
   const router = useRouter()
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch("http://localhost:8000/api/user", {
-          credentials: "include",
-          headers: {
-            Accept: "application/json",
-          },
-        })
+useEffect(() => {
+  const checkAuth = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/api/user", {
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+           "X-Requested-With": "XMLHttpRequest",
+        },
+      })
 
-        if (res.status !== 200) {
-          router.push("/login")
-          return
+      if (!res.ok) {
+          throw new Error("Unauthorized")
         }
 
-        const data = await res.json()
-        setUser(data)
-        setLoading(false)
-      } catch (error) {
-        router.push("/login")
+      const data = await res.json()
+
+      if (data.role !== "admin") {
+        // Redirect ke halaman sesuai role
+        const redirectPath = data.role === "user" ? "/user/dashboard" : "/login"
+        router.replace(redirectPath)
+        return
       }
+
+      setUser(data)
+    } catch (error) {
+      console.error("Auth check failed:", error)
+      router.replace("/login")
+    } finally {
+      setLoading(false)
     }
+  }
 
-    checkAuth()
-  }, [router])
+  checkAuth()
+}, [router])
 
-  if (loading)
-    return (
-      <div className="p-6 text-center text-slate-600 dark:text-slate-400">
-        Memuat dashboard...
-      </div>
-    )
+if (loading)
+  return (
+    <div className="p-6 text-center text-slate-600 dark:text-slate-400">
+      Memuat dashboard...
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
