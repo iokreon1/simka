@@ -7,7 +7,7 @@ import StatusPengajuan from "@/components/perpanjangan-kartu/status-pengajuan"
 
 export default function PerpanjanganKartuTabs() {
   return (
-    <Tabs defaultValue="form" className="w-full">
+    <Tabs defaultValue="form" className="max-w-6xl mx-auto">
       <TabsList className="mb-4 grid w-full grid-cols-3">
         <TabsTrigger value="form">Form Pengajuan</TabsTrigger>
         <TabsTrigger value="upload">Upload Dokumen</TabsTrigger>

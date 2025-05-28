@@ -5,7 +5,7 @@ import { ActivityItem } from "./activity-item"
 
 export function ActivitiesSection() {
   return (
-    <Card className="border-none shadow-md lg:col-span-2">
+    <Card className="border-none shadow-md">
       <CardHeader>
         <CardTitle>Aktivitas Terbaru</CardTitle>
         <CardDescription>Riwayat aktivitas dalam sistem</CardDescription>
