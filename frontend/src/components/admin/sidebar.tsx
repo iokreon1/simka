@@ -89,8 +89,8 @@ export function Sidebar() {
         <NavItem href="/admin/perpanjangan-kartu" icon={<FileCheck className="h-5 w-5" />} label="Perpanjangan Kartu" />
         <NavItem href="/admin/pengajuan-rekomendasi" icon={<FileText className="h-5 w-5" />} label="Pengajuan Rekomendasi" />
         <NavItem href="/admin/rekapitulasi-data" icon={<BarChart3 className="h-5 w-5" />} label="Rekapitulasi Data" />
-        <NavItem href="/riwayat" icon={<ClipboardList className="h-5 w-5" />} label="Riwayat & Tracking" />
-        <NavItem href="/reminder" icon={<MessageSquare className="h-5 w-5" />} label="Smart Reminder" />
+        <NavItem href="/admin/arsip-digital" icon={<ClipboardList className="h-7 w-7" />} label="Pengelolaan & Penelusuran Arsip Digital" />
+        <NavItem href="/admin/smart-reminder" icon={<MessageSquare className="h-5 w-5" />} label="Smart Reminder" />
         <NavItem href="/pemetaan" icon={<Map className="h-5 w-5" />} label="Pemetaan Lokasi" />
       </div>
       <div className="mt-auto space-y-1 pt-4">

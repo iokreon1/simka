@@ -52,9 +52,9 @@ export default function RekapitulasiPage() {
             </aside>
 
       {/* Main content dengan margin top untuk header */}
-      <div className="flex-1 md:ml-64 px-4 pt-6">
-        <main className="max-w-6xl space-y-8 mx-auto">
-          <div className="mb-6">
+      <div className="flex-1 md:ml-64 px-6 pt-7">
+        <main className="max-w-7xl space-y-8 mx-auto">
+          <div className="mb-">
             <h1 className="text-2xl font-bold text-gray-900 mb-1">Rekapitulasi Data</h1>
           </div>
           <EnhancedFilterSection
