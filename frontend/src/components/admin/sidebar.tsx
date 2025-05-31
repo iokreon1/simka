@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
 import type React from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"
 import {
   BarChart3,
   ClipboardList,
@@ -43,54 +43,54 @@ export function Sidebar() {
   const router = useRouter()
 
   const getCookie = (name: string): string => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return decodeURIComponent(parts.pop()!.split(';').shift() || '');
-  return '';
-};
-
-const handleLogout = async () => {
-  try {
-    // Ambil CSRF cookie dulu
-    await fetch("http://localhost:8000/sanctum/csrf-cookie", {
-      credentials: "include",
-    });
-
-    // Ambil token CSRF dari cookie
-    const csrfToken = getCookie("XSRF-TOKEN");
-    if (!csrfToken) throw new Error("CSRF token tidak ditemukan.");
-
-    // Panggil API logout dengan header X-XSRF-TOKEN
-    await fetch("http://localhost:8000/api/logout", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Accept": "application/json",
-        "X-Requested-With": "XMLHttpRequest",
-        "X-XSRF-TOKEN": csrfToken,
-      },
-    });
-
-    // Bersihkan cookie atau localStorage jika ada (opsional)
-    // Contoh hapus cookie bernama 'role' atau lainnya
-    document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-
-    // Redirect ke halaman login pakai replace supaya tidak bisa back
-    router.replace("/login");
-  } catch (error) {
-    console.error("Gagal logout:", error);
+    const value = `; ${document.cookie}`
+    const parts = value.split(`; ${name}=`)
+    if (parts.length === 2) return decodeURIComponent(parts.pop()!.split(";").shift() || "")
+    return ""
   }
-};
+
+  const handleLogout = async () => {
+    try {
+      // Ambil CSRF cookie dulu
+      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
+        credentials: "include",
+      })
+
+      // Ambil token CSRF dari cookie
+      const csrfToken = getCookie("XSRF-TOKEN")
+      if (!csrfToken) throw new Error("CSRF token tidak ditemukan.")
+
+      // Panggil API logout dengan header X-XSRF-TOKEN
+      await fetch("http://localhost:8000/api/logout", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+          "X-XSRF-TOKEN": csrfToken,
+        },
+      })
+
+      // Bersihkan cookie atau localStorage jika ada (opsional)
+      // Contoh hapus cookie bernama 'role' atau lainnya
+      document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+
+      // Redirect ke halaman login pakai replace supaya tidak bisa back
+      router.replace("/login")
+    } catch (error) {
+      console.error("Gagal logout:", error)
+    }
+  }
 
   return (
     <nav className="flex h-full flex-col px-3 py-4">
       <div className="space-y-1">
-        <NavItem href="/dashboard" icon={<Home className="h-5 w-5" />} label="Dashboard" active />
-        <NavItem href="/perpanjangan-kartu" icon={<FileCheck className="h-5 w-5" />} label="Perpanjangan Kartu" />
-        <NavItem href="/rekomendasi" icon={<FileText className="h-5 w-5" />} label="Pengajuan Rekomendasi" />
-        <NavItem href="/rekapitulasi" icon={<BarChart3 className="h-5 w-5" />} label="Rekapitulasi Data" />
-        <NavItem href="/riwayat" icon={<ClipboardList className="h-5 w-5" />} label="Riwayat & Tracking" />
-        <NavItem href="/reminder" icon={<MessageSquare className="h-5 w-5" />} label="Smart Reminder" />
+        <NavItem href="/admin/dashboard" icon={<Home className="h-5 w-5" />} label="Dashboard" active />
+        <NavItem href="/admin/perpanjangan-kartu" icon={<FileCheck className="h-5 w-5" />} label="Perpanjangan Kartu" />
+        <NavItem href="/admin/pengajuan-rekomendasi" icon={<FileText className="h-5 w-5" />} label="Pengajuan Rekomendasi" />
+        <NavItem href="/admin/rekapitulasi-data" icon={<BarChart3 className="h-5 w-5" />} label="Rekapitulasi Data" />
+        <NavItem href="/admin/arsip-digital" icon={<ClipboardList className="h-7 w-7" />} label="Pengelolaan & Penelusuran Arsip Digital" />
+        <NavItem href="/admin/smart-reminder" icon={<MessageSquare className="h-5 w-5" />} label="Smart Reminder" />
         <NavItem href="/pemetaan" icon={<Map className="h-5 w-5" />} label="Pemetaan Lokasi" />
       </div>
       <div className="mt-auto space-y-1 pt-4">

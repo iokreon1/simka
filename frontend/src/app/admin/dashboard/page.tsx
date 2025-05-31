@@ -5,12 +5,11 @@ import { useRouter } from "next/navigation"
 
 import { Header } from "@/components/admin/header"
 import { Sidebar } from "@/components/admin/sidebar"
-import { QuickActions } from "@/components/admin/quick-actions"
-import { StatsCards } from "@/components/admin/stats-cards"
-import { ApplicationsSection } from "@/components/admin/applications-section"
-import { StatusSection } from "@/components/admin/status-section"
-import { FeaturesSection } from "@/components/admin/features-section"
+import { EnhancedStatsCards } from "@/components/admin/enhanced-stats-cards"
+import { DetailedApplicationsSection } from "@/components/admin/detailed-applications-section"
+import { EnhancedStatusSection } from "@/components/admin/enhanced-status-section"
 import { ActivitiesSection } from "@/components/admin/activities-section"
+import { EnhancedGisSection } from "@/components/admin/enhanced-gis-section"
 
 export default function DashboardPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -18,48 +17,51 @@ export default function DashboardPage() {
   const [user, setUser] = useState<{ name?: string } | null>(null)
   const router = useRouter()
 
-useEffect(() => {
-  const checkAuth = async () => {
-    try {
-      const res = await fetch("http://localhost:8000/api/user", {
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-           "X-Requested-With": "XMLHttpRequest",
-        },
-      })
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/user", {
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        })
 
-      if (!res.ok) {
+        if (!res.ok) {
           throw new Error("Unauthorized")
         }
 
-      const data = await res.json()
+        const data = await res.json()
 
-      if (data.role !== "admin") {
-        // Redirect ke halaman sesuai role
-        const redirectPath = data.role === "user" ? "/user/dashboard" : "/login"
-        router.replace(redirectPath)
-        return
+        if (data.role !== "admin") {
+          // Redirect ke halaman sesuai role
+          const redirectPath = data.role === "user" ? "/user/dashboard" : "/login"
+          router.replace(redirectPath)
+          return
+        }
+
+        setUser(data)
+      } catch (error) {
+        console.error("Auth check failed:", error)
+        router.replace("/login")
+      } finally {
+        setLoading(false)
       }
-
-      setUser(data)
-    } catch (error) {
-      console.error("Auth check failed:", error)
-      router.replace("/login")
-    } finally {
-      setLoading(false)
     }
-  }
 
-  checkAuth()
-}, [router])
+    checkAuth()
+  }, [router])
 
-if (loading)
-  return (
-    <div className="p-6 text-center text-slate-600 dark:text-slate-400">
-      Memuat dashboard...
-    </div>
-  )
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400">Memuat dashboard...</p>
+        </div>
+      </div>
+    )
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -75,34 +77,43 @@ if (loading)
         {/* Main Content */}
         <main className="flex-1 px-4 pt-6 md:ml-64">
           <div className="container mx-auto max-w-6xl pb-12">
+            {/* Welcome Section */}
             <div className="mb-8">
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
-              <p className="text-slate-500 dark:text-slate-400">
-                Selamat datang kembali, {user?.name || "User"}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Dashboard Admin</h1>
+                  <p className="text-slate-500 dark:text-slate-400 mt-1">
+                    Selamat datang kembali, {user?.name || "Admin"}. Berikut ringkasan sistem hari ini.
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Terakhir diperbarui</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">
+                    {new Date().toLocaleString("id-ID")}
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* Quick Actions */}
-            <QuickActions />
+            {/* Enhanced Stats Cards */}
+            <EnhancedStatsCards />
 
-            {/* Stats Cards */}
-            <StatsCards />
-
+            {/* Main Content Grid */}
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-              {/* Pengajuan Terbaru */}
+              {/* Pengajuan Terbaru - Takes 2 columns */}
               <div className="lg:col-span-2">
-                <ApplicationsSection />
+                <DetailedApplicationsSection />
               </div>
 
-              {/* Status & Smart Reminder */}
+              {/* Status & Smart Reminder - Takes 1 column */}
               <div className="lg:col-span-1">
-                <StatusSection />
+                <EnhancedStatusSection />
               </div>
             </div>
 
-            {/* Fitur Sistem & Aktivitas Terbaru */}
-            <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
-              <FeaturesSection />
+            {/* Bottom Section */}
+            <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
+              <EnhancedGisSection />
               <ActivitiesSection />
             </div>
           </div>
